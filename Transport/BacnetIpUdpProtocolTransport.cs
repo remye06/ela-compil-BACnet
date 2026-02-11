@@ -215,15 +215,21 @@ public class BacnetIpUdpProtocolTransport : BacnetTransportBase
             {
                 if (connection.Client != null && !_disposing)
                 {
-                    try
-                    {
-                        // BeginReceive ASAP to enable parallel processing (e.g. query additional data while processing a notification)
-                        connection.BeginReceive(OnReceiveData, connection);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error($"Failed to restart data receive. {ex}");
-                    }
+					// BeginReceive ASAP to enable parallel processing (e.g. query additional data while processing a notification)
+					ThreadPool.UnsafeQueueUserWorkItem(static state =>
+					{
+						var (transport, udp) = ((BacnetIpUdpProtocolTransport transport, UdpClient udp)) state!;
+						if (udp.Client == null || transport._disposing) return;
+
+						try
+						{
+							udp.BeginReceive(transport.OnReceiveData, udp);
+						}
+						catch (Exception ex)
+						{
+							transport.Log.Error($"Failed to restart data receive. {ex}");
+						}
+					}, (this, connection));
                 }
             }
 

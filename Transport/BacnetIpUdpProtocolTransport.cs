@@ -233,7 +233,6 @@ public class BacnetIpUdpProtocolTransport : BacnetTransportBase
                 }
             }
 
-            var receiveBufferHex = ConvertToHex(receiveBuffer);
             var receivedLength = receiveBuffer.Length;
 
             if (receivedLength == 0) // Empty frame : port scanner maybe
@@ -244,7 +243,7 @@ public class BacnetIpUdpProtocolTransport : BacnetTransportBase
 
             if (receivedLength < BVLC.BVLC_HEADER_LENGTH)
             {
-                Log.Warn($"Some garbage data got in: {receiveBufferHex}");
+                Log.Warn($"Some garbage data got in: {ConvertToHex(receiveBuffer)}");
                 return;
             }
 
@@ -253,7 +252,7 @@ public class BacnetIpUdpProtocolTransport : BacnetTransportBase
 
             if (headerLength == -1)
             {
-                Log.Warn($"Unknow BVLC Header in: {receiveBufferHex}");
+                Log.Warn($"Unknow BVLC Header in: {ConvertToHex(receiveBuffer)}");
                 return;
             }
 
@@ -286,7 +285,7 @@ public class BacnetIpUdpProtocolTransport : BacnetTransportBase
 
             if (receivedLength <= headerLength)
             {
-                Log.Warn($"Missing data, only header received: {receiveBufferHex}");
+                Log.Warn($"Missing data, only header received: {ConvertToHex(receiveBuffer)}");
                 return;
             }
 
